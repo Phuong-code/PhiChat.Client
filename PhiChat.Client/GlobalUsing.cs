@@ -1,0 +1,15 @@
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Text;
+global using System.Threading.Tasks;
+global using PhiChat.Client.Helpers;
+global using Newtonsoft.Json;
+global using PhiChat.Client.Services.Authenticate;
+global using ServiceProvider = PhiChat.Client.Services.ServiceProvider;
+global using System.Windows.Input;
+global using PhiChat.Client.ViewModels;
+global using PhiChat.Client.Models;
+global using PhiChat.Client.Pages;
+global using CommunityToolkit.Mvvm.ComponentModel;
+global using CommunityToolkit.Mvvm.Input;
