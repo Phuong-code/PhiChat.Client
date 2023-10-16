@@ -57,9 +57,11 @@ namespace PhiChat.Client.Services
         public async Task<TResponse> CallWebApi<TRequest, TResponse>(
             string apiUrl, HttpMethod httpMethod, TRequest request) where TResponse : BaseResponse
         {
-            var httpRequestMessage = new HttpRequestMessage();
-            httpRequestMessage.Method = HttpMethod.Post;
-            httpRequestMessage.RequestUri = new Uri(_devSslHelper.DevServerRootUrl + apiUrl);
+            var httpRequestMessage = new HttpRequestMessage
+            {
+                Method = httpMethod,
+                RequestUri = new Uri(_devSslHelper.DevServerRootUrl + apiUrl)
+            };
             httpRequestMessage.Headers.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _accessToken);
 

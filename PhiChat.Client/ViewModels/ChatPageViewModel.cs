@@ -1,8 +1,10 @@
-﻿using PhiChat.Client.Services.Message;
+﻿using PhiChat.Client.Services.ChatHub;
+using PhiChat.Client.Services.Message;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -11,9 +13,47 @@ using System.Web;
 
 namespace PhiChat.Client.ViewModels
 {
-    public class ChatPageViewModel : INotifyPropertyChanged, IQueryAttributable
+    public partial class ChatPageViewModel : ObservableObject, IQueryAttributable
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        [ObservableProperty]
+        private int fromUserId;
+
+        [ObservableProperty]
+        private int toUserId;
+
+        [ObservableProperty]
+        private User friendInfo;
+
+        [ObservableProperty]
+        private ObservableCollection<Message> messages;
+
+        [ObservableProperty]
+        private bool isRefreshing;
+
+        [ObservableProperty]
+        private bool isVisible = true;
+
+        [ObservableProperty]
+        private string message;
+
+        [ObservableProperty]
+        private bool messageEntryIsFocus;
+
+        [ObservableProperty]
+        private CollectionView chatCollectionView;
+
+        private readonly ServiceProvider _serviceProvider;
+
+        private readonly ChatHub _chatHub;
+
+        public ChatPageViewModel(ServiceProvider serviceProvider, ChatHub chatHub)
+        {
+            Messages = new ObservableCollection<Message>();
+            _serviceProvider = serviceProvider;
+            _chatHub = chatHub;
+            _chatHub.AddReceivedMessageHandler(OnReceiveMessage);
+            //_chatHub.Connect();
+        }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
@@ -24,137 +64,127 @@ namespace PhiChat.Client.ViewModels
 
         }
 
-        private ServiceProvider _serviceProvider;
-        //private ChatHub _chatHub;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public async void Initialize()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            await GetMessages();
+            ScrollToBottom();
+
         }
 
-        public ChatPageViewModel(ServiceProvider serviceProvider)
-            //public ChatPageViewModel(ServiceProvider serviceProvider, ChatHub chatHub)
+        [RelayCommand]
+        public async Task SendMessage()
         {
-            Messages = new ObservableCollection<Message>();
-            _serviceProvider = serviceProvider;
-            //_chatHub = chatHub;
-            //_chatHub.AddReceivedMessageHandler(OnReceiveMessage);
-            //_chatHub.Connect();
-
-            //SendMessageCommand = new Command(async () =>
-            //{
-            //    try
-            //    {
-            //        if (Message.Trim() != "")
-            //        {
-            //            await _chatHub.SendMessageToUser(FromUserId, ToUserId, Message);
-
-            //            Messages.Add(new Models.Message
-            //            {
-            //                Content = Message,
-            //                FromUserId = FromUserId,
-            //                ToUserId = ToUserId,
-            //                SendDateTime = DateTime.Now
-            //            });
-
-            //            Message = "";
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        await AppShell.Current.DisplayAlert("ChatApp", ex.Message, "OK");
-            //    }
-            //});
-        }
-
-        async Task GetMessages()
-        {
-            var request = new MessageInitializeRequest
+            try
             {
-                FromUserId = FromUserId,
-                ToUserId = ToUserId,
-            };
+                if (Message == null || Message.Trim() == "")
+                {
+                    return;
+                }
+                else
+                {
+                    _chatHub.SendMessageToUser(FromUserId, ToUserId, Message);
 
-            var response = await _serviceProvider.CallWebApi<MessageInitializeRequest, MessageInitializeReponse>
-                ("/Message/Initialize", HttpMethod.Post, request);
+                    Messages.Add(new Message
+                    {
+                        Content = Message.Trim(),
+                        FromUserId = FromUserId,
+                        ToUserId = ToUserId,
+                        SendDateTime = DateTime.Now
+                    });
 
-            if (response.StatusCode == 200)
-            {
-                FriendInfo = response.FriendInfo;
-                Messages = new ObservableCollection<Message>(response.Messages);
+                    Message = "";
+
+                    ScrollToBottom();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await AppShell.Current.DisplayAlert("ChatApp", response.StatusMessage, "OK");
+                await AppShell.Current.DisplayAlert("PhiChat", ex.Message, "OK");
             }
         }
 
-        public void Initialize()
+        [RelayCommand]
+        private async Task Refresh()
         {
-            Task.Run(async () =>
+            IsVisible = false;
+            await GetMessages();
+            IsVisible = true;
+        }
+
+        private async Task GetMessages()
+        {
+            IsRefreshing = true;
+            try
             {
-                IsRefreshing = true;
-                await GetMessages();
-            }).GetAwaiter().OnCompleted(() =>
+                var request = new MessageInitializeRequest
+                {
+                    FromUserId = FromUserId,
+                    ToUserId = ToUserId,
+                };
+
+                var response = await _serviceProvider.CallWebApi<MessageInitializeRequest, MessageInitializeReponse>
+                    ("/Message/Initialize", HttpMethod.Post, request);
+
+                if (response.StatusCode == 200)
+                {
+                    FriendInfo = response.FriendInfo;
+                    Messages = new ObservableCollection<Message>(response.Messages);
+
+                    //var message = new Message
+                    //{
+                    //    FromUserId = 0,
+                    //    SendDateTime = DateTime.Now,
+                    //    Content = null,
+                    //};
+
+                    //Messages.Insert(2, message);
+                }
+                else
+                {
+                    await AppShell.Current.DisplayAlert("ChatApp", response.StatusMessage, "OK");
+                }
+            }
+            catch (Exception ex)
             {
-                IsRefreshing = false;
-            });
+                await AppShell.Current.DisplayAlert("Can't get previous messages", $"{ex.Message}", "OK");
+            }
+            finally
+            {
+                IsRefreshing = false; 
+            }
         }
 
         private void OnReceiveMessage(int fromUserId, string message)
         {
-            Messages.Add(new Models.Message
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
-                Content = message,
-                FromUserId = ToUserId,
-                ToUserId = FromUserId,
-                SendDateTime = DateTime.Now
+                Messages.Add(new Models.Message
+                {
+                    Content = message,
+                    FromUserId = ToUserId,
+                    ToUserId = FromUserId,
+                    SendDateTime = DateTime.Now,
+                });
+
+
+                ScrollToBottom();
+
+                var request = new MessageInitializeRequest
+                {
+                    FromUserId = FromUserId,
+                    ToUserId = ToUserId,
+                };
+
+                await _serviceProvider.CallWebApi<MessageInitializeRequest, MessageInitializeReponse>("/Message/ReadMessage", HttpMethod.Post, request);
             });
         }
 
-        private int fromUserId;
-        private int toUserId;
-        private User friendInfo;
-        private ObservableCollection<Message> messages;
-        private bool isRefreshing;
-        private string message;
-
-        public int FromUserId
+        public void ScrollToBottom()
         {
-            get { return fromUserId; }
-            set { fromUserId = value; OnPropertyChanged(); }
+            if (Messages.Count != 0 )
+            {
+                ChatCollectionView.ScrollTo(Messages.Last(), position: ScrollToPosition.End, animate: true);
+            }
         }
-
-        public int ToUserId
-        {
-            get { return toUserId; }
-            set { toUserId = value; OnPropertyChanged(); }
-        }
-
-        public User FriendInfo
-        {
-            get { return friendInfo; }
-            set { friendInfo = value; OnPropertyChanged(); }
-        }
-
-        public ObservableCollection<Message> Messages
-        {
-            get { return messages; }
-            set { messages = value; OnPropertyChanged(); }
-        }
-
-        public bool IsRefreshing
-        {
-            get { return isRefreshing; }
-            set { isRefreshing = value; OnPropertyChanged(); }
-        }
-
-        public string Message
-        {
-            get { return message; }
-            set { message = value; OnPropertyChanged(); }
-        }
-
-        public ICommand SendMessageCommand { get; set; }
     }
 }

@@ -5,92 +5,100 @@
              xmlns:viewModel="clr-namespace:PhiChat.Client.ViewModels"
              Title="LoginPage">
     <Grid>
-        <VerticalStackLayout Margin="30" VerticalOptions="Center">
-            <Label
-            FontSize="45"
-            HorizontalOptions="Center"
-            Text="PhiChat"/>
+        <VerticalStackLayout Spacing="25"
+                             Padding="30,0">
 
-            <Label
-            FontSize="20"
-            HorizontalOptions="Center"
-            Text="Login"/>
+            <Image Margin="0,20,0,0"
+                Source="phichat.png"
+                   HeightRequest="300"
+                   WidthRequest="300" />
 
-            <Frame
-            Margin="0,45,0,0"
-            Padding="10,0,10,0"
-            BorderColor="Transparent">
-                <Entry
-                Placeholder="Username"
-                ReturnType="Go"
-                Text="{Binding Username}"
-                TextColor="Black" />
-            </Frame>
+            <VerticalStackLayout Spacing="5"
+                                 Margin="0,-80,0,0">
+                <Label Text="Sign In"
+                       FontSize="28"
+                       TextColor="Gray"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Login to your account"
+                       FontSize="18"
+                       TextColor="Gray"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
 
-            <Frame
-            Margin="0,10,0,0"
-            Padding="10,0,10,0"
-            BorderColor="Transparent">
-                <Entry
-                IsPassword="True"
-                Placeholder="Password"
-                ReturnType="Go"
-                Text="{Binding Password}"
-                TextColor="Black" />
-            </Frame>
-
-            <Label
-            Margin="0,10,0,0"
-            Text="Forgot password"
-            TextColor="#1e90ff" />
-
-            <Button
-            Margin="0,30,0,0"
-            Background="#f0932b"
-            Command="{Binding LoginCommand}"
-            Text="Login"
-            TextColor="White" />
-
-            <HorizontalStackLayout Margin="0,50,0,0" HorizontalOptions="Center">
-                <Line
-                BackgroundColor="Gray"
-                HeightRequest="0.5"
-                WidthRequest="60" />
-                <Label Margin="10,0,10,0" Text="Or continue with" />
-                <Line
-                BackgroundColor="Gray"
-                HeightRequest="0.5"
-                WidthRequest="60" />
-            </HorizontalStackLayout>
-
-            <HorizontalStackLayout Margin="0,30,0,0" HorizontalOptions="Center">
-                <Frame Padding="15,10,15,10">
-                    <Image
-                    HeightRequest="32"
-                    Source="google_logo.png"
-                    WidthRequest="32" />
+            <StackLayout Orientation="Horizontal">
+                <Frame ZIndex="1"
+                       HasShadow="True"
+                       BorderColor="White"
+                       HeightRequest="56"
+                       WidthRequest="56"
+                       CornerRadius="28">
+                    <Image Source="email.png"
+                           HeightRequest="20"
+                           WidthRequest="20" />
                 </Frame>
-                <Frame Margin="20,0,0,0" Padding="15,10,15,10">
-                    <Image
-                    HeightRequest="32"
-                    Source="apple_logo.png"
-                    WidthRequest="32" />
+                <Frame HeightRequest="45"
+                       Margin="-20,0,0,0"
+                       Padding="0"
+                       HasShadow="True"
+                       BorderColor="White"
+                       HorizontalOptions="FillAndExpand">
+                    <Entry x:Name="usernameEntry"
+                           Text="{Binding Username}"
+                           Margin="20,0,0,0"
+                           PlaceholderColor="#787777"
+                           VerticalOptions="Center"
+                           Placeholder="Email "
+                           Keyboard="Email" />
                 </Frame>
-            </HorizontalStackLayout>
+            </StackLayout>
 
-            <HorizontalStackLayout Margin="0,40,0,0" HorizontalOptions="Center">
-                <Label Text="Not a members?" />
-                <Label
-                Margin="5,0,0,0"
-                Text="Register now"
-                TextColor="#1e90ff" />
-            </HorizontalStackLayout>
+            <StackLayout Orientation="Horizontal"
+                         Margin="0,0,0,0">
+                <Frame ZIndex="1"
+                       HasShadow="True"
+                       BorderColor="White"
+                       HeightRequest="56"
+                       WidthRequest="56"
+                       CornerRadius="28">
+                    <Image Source="lock.png"
+                           HeightRequest="20"
+                           WidthRequest="20" />
+                </Frame>
+                <Frame HeightRequest="45"
+                       Margin="-20,0,0,0"
+                       Padding="0"
+                       HasShadow="True"
+                       BorderColor="White"
+                       HorizontalOptions="FillAndExpand">
+                    <Entry x:Name="passwordEntry"
+                           Text="{Binding Password}"
+                           Margin="20,0,0,0"
+                           VerticalOptions="Center"
+                           PlaceholderColor="#787777"
+                           Placeholder="Password"
+                           IsPassword="True" />
+                </Frame>
+            </StackLayout>
 
+            <Button Text="Sign In"
+                    WidthRequest="300"
+                    CornerRadius="20"
+                    HorizontalOptions="Center"
+                    BackgroundColor="#0096FF"
+                    Command="{Binding LoginCommand}" />
+
+            <StackLayout Orientation="Horizontal"
+                         Spacing="5"
+                         HorizontalOptions="Center">
+                <Label Text="Don't have account?"
+                       TextColor="Gray" />
+                <Label Text="SIGN UP"
+                       TextColor="#50b3f2">
+                </Label>
+            </StackLayout>
         </VerticalStackLayout>
-
-        <ActivityIndicator
-        HeightRequest="60"
-        IsRunning="{Binding IsProcessing}"
-        WidthRequest="60" />
+        <ActivityIndicator HeightRequest="60"
+                           IsRunning="{Binding IsProcessing}"
+                           WidthRequest="60" />
     </Grid>
 </ContentPage>

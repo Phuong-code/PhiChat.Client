@@ -4,17 +4,13 @@
              x:Class="PhiChat.Client.Pages.ListChatPage"
              xmlns:helper="clr-namespace:PhiChat.Client.Helpers"
              xmlns:viewModels="clr-namespace:PhiChat.Client.ViewModels"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
              Title="ListChatPage"
-             Background="#13232f"
              NavigatedTo="ContentPage_NavigatedTo">
-    <ContentPage.IconImageSource>
-        <FontImageSource
-        FontFamily="IconFontTypes"
-        Glyph="{x:Static helper:IconFontHelper.Messenger}"
-        Size="20" />
-    </ContentPage.IconImageSource>
-    <RefreshView Margin="10" IsRefreshing="{Binding IsRefreshing}">
-        <Grid RowSpacing="10">
+    <RefreshView Margin="10"
+                 IsRefreshing="{Binding IsRefreshing}">
+        <Grid RowSpacing="10"
+              Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
                 <RowDefinition Height="45" />
@@ -24,233 +20,235 @@
 
             <Grid>
                 <StackLayout Orientation="Horizontal">
-                    <Image
-                    HeightRequest="32"
-                    Source="{Binding UserInfo.AvatarSourceName}"
-                    VerticalOptions="Center"
-                    WidthRequest="32" />
-                    <Label
-                    Margin="10,0,0,0"
-                    FontAttributes="Bold"
-                    FontSize="20"
-                    Text="{Binding UserInfo.UserName}"
-                    VerticalOptions="Center" />
+                    <Frame Padding="0"
+                           CornerRadius="16"
+                           HeightRequest="32">
+                        <Image HeightRequest="32"
+                               Source="{Binding UserInfo.AvatarSourceName}"
+                               VerticalOptions="Center"
+                               WidthRequest="32" />
+                    </Frame>
+                    <Label Margin="10,0,0,0"
+                           FontAttributes="Bold"
+                           FontSize="20"
+                           Text="{Binding UserInfo.UserName}"
+                           VerticalOptions="Center" />
                 </StackLayout>
-                <StackLayout
-                HorizontalOptions="End"
-                Orientation="Horizontal"
-                VerticalOptions="Center">
-                    <Button
-                    BackgroundColor="#152c39"
-                    CornerRadius="45"
-                    HeightRequest="32"
-                    WidthRequest="32">
+                <StackLayout HorizontalOptions="End"
+                             Orientation="Horizontal"
+                             VerticalOptions="Center">
+                    <!--<Button BackgroundColor="#152c39"
+                            CornerRadius="45"
+                            HeightRequest="32"
+                            WidthRequest="32">
                         <Button.ImageSource>
-                            <FontImageSource
-                            FontFamily="IconFontTypes"
-                            Glyph="{x:Static helper:IconFontHelper.Camera_alt}"
-                            Size="18" />
+                            <FontImageSource FontFamily="IconFontTypes"
+                                             Glyph="{x:Static helper:IconFontHelper.Camera_alt}"
+                                             Size="18" />
                         </Button.ImageSource>
-                    </Button>
+                    </Button>-->
 
-                    <Button
-                    Margin="10,0,0,0"
-                    BackgroundColor="#152c39"
-                    CornerRadius="45"
-                    HeightRequest="32"
-                    WidthRequest="32">
+                    <Button Margin="10,0,0,0"
+                            BackgroundColor="#c4c4c4"
+                            CornerRadius="45"
+                            HeightRequest="32"
+                            WidthRequest="32">
                         <Button.ImageSource>
-                            <FontImageSource
-                            FontFamily="IconFontTypes"
-                            Glyph="{x:Static helper:IconFontHelper.Edit}"
-                            Size="18" />
+                            <FontImageSource FontFamily="IconFontTypes"
+                                             Glyph="{x:Static helper:IconFontHelper.Edit}"
+                                             Size="18" />
                         </Button.ImageSource>
                     </Button>
                 </StackLayout>
             </Grid>
 
             <Grid Grid.Row="1">
-                <Frame
-                Padding="0"
-                BackgroundColor="#152c39"
-                BorderColor="Transparent"
-                CornerRadius=" 45">
+                <Frame Padding="0"
+                       BackgroundColor="#f2f0f0"
+                       BorderColor="Transparent"
+                       CornerRadius=" 45">
 
-                    <StackLayout
-                    HeightRequest="48"
-                    Orientation="Horizontal"
-                    VerticalOptions="Center">
-                        <Image
-                        Margin="20,0,0,0"
-                        BackgroundColor="Transparent"
-                        VerticalOptions="Center">
+                    <StackLayout HeightRequest="48"
+                                 Orientation="Horizontal"
+                                 VerticalOptions="Center">
+                        <Image Margin="20,0,0,0"
+                               BackgroundColor="Transparent"
+                               VerticalOptions="Center">
                             <Image.Source>
-                                <FontImageSource
-                                FontFamily="IconFontTypes"
-                                Glyph="{x:Static helper:IconFontHelper.Search}"
-                                Size="18"
-                                Color="Gray" />
+                                <FontImageSource FontFamily="IconFontTypes"
+                                                 Glyph="{x:Static helper:IconFontHelper.Search}"
+                                                 Size="18"
+                                                 Color="#787777" />
                             </Image.Source>
                         </Image>
 
-                        <Label
-                        Margin="10,0,0,0"
-                        Text="Search"
-                        TextColor="Gray"
-                        VerticalOptions="Center" />
+                        <Entry x:Name="searchEntry"
+                               Margin="10,0,0,0"
+                               Text="{Binding SearchText}"
+                               Placeholder="Search"
+                               PlaceholderColor="#787777"
+                               TextColor="#787777"
+                               VerticalOptions="Center"
+                               HorizontalOptions="FillAndExpand"
+                               ReturnCommand="{Binding SearchCommand}"
+                               TextChanged="Entry_TextChanged">
+                        </Entry>
+
                     </StackLayout>
                 </Frame>
             </Grid>
 
             <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
+                <!--<Grid.ColumnDefinitions>
                     <ColumnDefinition Width="72" />
                     <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <StackLayout WidthRequest="72">
-                    <Button
-                    Margin="10,0,0,0"
-                    BackgroundColor="#152c39"
-                    CornerRadius="45"
-                    HeightRequest="54"
-                    WidthRequest="54">
+                </Grid.ColumnDefinitions>-->
+                <!--<StackLayout WidthRequest="72">
+                    <Button Margin="10,0,0,0"
+                            BackgroundColor="#152c39"
+                            CornerRadius="45"
+                            HeightRequest="54"
+                            WidthRequest="54">
                         <Button.ImageSource>
-                            <FontImageSource
-                            FontFamily="IconFontTypes"
-                            Glyph="{x:Static helper:IconFontHelper.Video_call}"
-                            Size="24" />
+                            <FontImageSource FontFamily="IconFontTypes"
+                                             Glyph="{x:Static helper:IconFontHelper.Video_call}"
+                                             Size="24" />
                         </Button.ImageSource>
                     </Button>
 
-                    <Label
-                    Margin="0,5,0,0"
-                    FontSize="12"
-                    HorizontalOptions="Center"
-                    HorizontalTextAlignment="Center"
-                    Text="Create video call" />
-                </StackLayout>
+                    <Label Margin="0,5,0,0"
+                           FontSize="12"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           Text="Create video call" />
+                </StackLayout>-->
 
-                <CollectionView
-                Grid.Column="1"
-                Margin="10,0,0,0"
-                ItemsSource="{Binding UserFriends}">
+                <CollectionView Grid.Column="1"
+                                Margin="10,0,0,0"
+                                ItemsSource="{Binding UserFriends}">
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout ItemSpacing="10" Orientation="Horizontal" />
+                        <LinearItemsLayout ItemSpacing="10"
+                                           Orientation="Horizontal" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <VerticalStackLayout>
-                                <Grid HeightRequest="54" WidthRequest="58">
-                                    <Image
-                                    HeightRequest="54"
-                                    HorizontalOptions="Start"
-                                    Source="{Binding AvatarSourceName}"
-                                    WidthRequest="54">
-                                        <Image.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Path=OpenChatPageCommand, Source={RelativeSource AncestorType={x:Type viewModels:ListChatPageViewModel}}}" CommandParameter="{Binding Id}" />
-                                        </Image.GestureRecognizers>
-                                    </Image>
-                                    <Ellipse
-                                    Fill="Green"
-                                    HeightRequest="18"
-                                    HorizontalOptions="End"
-                                    IsVisible="{Binding IsOnline}"
-                                    Stroke="#152c39"
-                                    StrokeThickness="3"
-                                    VerticalOptions="End"
-                                    WidthRequest="18" />
-                                    <Frame
-                                    Padding="5,0,5,0"
-                                    BackgroundColor="SkyBlue"
-                                    BorderColor="#152c39"
-                                    CornerRadius="10"
-                                    HeightRequest="12"
-                                    HorizontalOptions="End"
-                                    IsVisible="{Binding IsAway}"
-                                    VerticalOptions="End">
-                                        <Label
-                                        FontSize="10"
-                                        HorizontalOptions="Center"
-                                        Text="{Binding AwayDuration}"
-                                        TextColor="Black"
-                                        VerticalOptions="Center" />
+                                <Grid HeightRequest="54"
+                                      WidthRequest="58">
+                                    <Frame Padding="0"
+                                           CornerRadius="27"
+                                           HeightRequest="54"
+                                           WidthRequest="54">
+                                        <Image HeightRequest="54"
+                                               HorizontalOptions="Start"
+                                               Source="{Binding AvatarSourceName}"
+                                               WidthRequest="54">
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Path=OpenChatPageCommand, Source={RelativeSource AncestorType={x:Type viewModels:ListChatPageViewModel}}}"
+                                                                      CommandParameter="{Binding Id}" />
+                                            </Image.GestureRecognizers>
+                                        </Image>
+                                    </Frame>
+                                    <Ellipse Fill="Green"
+                                             HeightRequest="18"
+                                             HorizontalOptions="End"
+                                             IsVisible="{Binding IsOnline}"
+                                             Stroke="white"
+                                             StrokeThickness="3"
+                                             VerticalOptions="End"
+                                             WidthRequest="18" />
+                                    <Frame Padding="5,0,5,0"
+                                           BackgroundColor="SkyBlue"
+                                           BorderColor="white"
+                                           CornerRadius="10"
+                                           HeightRequest="12"
+                                           HorizontalOptions="End"
+                                           IsVisible="{Binding IsAway}"
+                                           VerticalOptions="End">
+                                        <Label FontSize="10"
+                                               HorizontalOptions="Center"
+                                               Text="{Binding AwayDuration}"
+                                               TextColor="Black"
+                                               VerticalOptions="Center" />
                                     </Frame>
                                 </Grid>
-                                <Label
-                                Margin="0,5,0,0"
-                                FontSize="12"
-                                HorizontalOptions="Center"
-                                HorizontalTextAlignment="Center"
-                                Text="{Binding UserName}" />
+                                <Label Margin="0,5,0,0"
+                                       FontSize="12"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       Text="{Binding UserName}" />
                             </VerticalStackLayout>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Grid>
 
-            <ListView
-            Grid.Row="3"
-            ItemsSource="{Binding LastestMessages}"
-            RowHeight="64"
-            SeparatorVisibility="None"
-            VerticalScrollBarVisibility="Never">
+            <ListView Grid.Row="3"
+                      ItemsSource="{Binding LastestMessages}"
+                      RowHeight="64"
+                      SeparatorVisibility="None"
+                      VerticalScrollBarVisibility="Never">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
                             <HorizontalStackLayout>
                                 <HorizontalStackLayout.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Path=OpenChatPageCommand, Source={RelativeSource AncestorType={x:Type viewModels:ListChatPageViewModel}}}" CommandParameter="{Binding UserFriendInfo.Id}" />
+                                    <TapGestureRecognizer Command="{Binding Path=OpenChatPageCommand, Source={RelativeSource AncestorType={x:Type viewModels:ListChatPageViewModel}}}"
+                                                          CommandParameter="{Binding UserFriendInfo.Id}" />
                                 </HorizontalStackLayout.GestureRecognizers>
-                                <Grid HeightRequest="54" WidthRequest="58">
-                                    <Image
-                                    HeightRequest="54"
-                                    HorizontalOptions="Start"
-                                    Source="{Binding UserFriendInfo.AvatarSourceName}"
-                                    WidthRequest="54" />
-                                    <Ellipse
-                                    Fill="Green"
-                                    HeightRequest="18"
-                                    HorizontalOptions="End"
-                                    IsVisible="{Binding UserFriendInfo.IsOnline}"
-                                    Stroke="#152c39"
-                                    StrokeThickness="3"
-                                    VerticalOptions="End"
-                                    WidthRequest="18" />
-                                    <Frame
-                                    Padding="5,0,5,0"
-                                    BackgroundColor="SkyBlue"
-                                    BorderColor="#152c39"
-                                    CornerRadius="10"
-                                    HeightRequest="12"
-                                    HorizontalOptions="End"
-                                    IsVisible="{Binding UserFriendInfo.IsAway}"
-                                    VerticalOptions="End">
-                                        <Label
-                                        FontSize="10"
-                                        HorizontalOptions="Center"
-                                        Text="{Binding UserFriendInfo.AwayDuration}"
-                                        TextColor="Black"
-                                        VerticalOptions="Center" />
+                                <Grid HeightRequest="54"
+                                      WidthRequest="58">
+                                    <Frame Padding="0"
+                                           CornerRadius="27"
+                                           HeightRequest="54"
+                                           WidthRequest="54">
+                                        <Image HeightRequest="54"
+                                               HorizontalOptions="Start"
+                                               Source="{Binding UserFriendInfo.AvatarSourceName}"
+                                               WidthRequest="54" />
+                                    </Frame>
+                                    <Ellipse Fill="green"
+                                             HeightRequest="18"
+                                             HorizontalOptions="End"
+                                             IsVisible="{Binding UserFriendInfo.IsOnline}"
+                                             Stroke="white"
+                                             StrokeThickness="3"
+                                             VerticalOptions="End"
+                                             WidthRequest="18" />
+                                    <Frame Padding="5,0,5,0"
+                                           BackgroundColor="SkyBlue"
+                                           BorderColor="white"
+                                           CornerRadius="10"
+                                           HeightRequest="12"
+                                           HorizontalOptions="End"
+                                           IsVisible="{Binding UserFriendInfo.IsAway}"
+                                           VerticalOptions="End">
+                                        <Label FontSize="10"
+                                               HorizontalOptions="Center"
+                                               Text="{Binding UserFriendInfo.AwayDuration}"
+                                               TextColor="Black"
+                                               VerticalOptions="Center" />
                                     </Frame>
                                 </Grid>
 
-                                <StackLayout
-                                Margin="10,5,0,0"
-                                HorizontalOptions="Start"
-                                VerticalOptions="Center">
-                                    <Label
-                                    FontSize="17"
-                                    HorizontalOptions="Start"
-                                    HorizontalTextAlignment="Start"
-                                    Text="{Binding UserFriendInfo.UserName}"
-                                    VerticalOptions="Center" />
+                                <StackLayout Margin="10,5,0,0"
+                                             HorizontalOptions="Start"
+                                             VerticalOptions="Center">
+                                    <Label FontSize="17"
+                                           HorizontalOptions="Start"
+                                           HorizontalTextAlignment="Start"
+                                           Text="{Binding UserFriendInfo.UserName}"                                  
+                                           FontAttributes="{Binding IsRead, Converter={StaticResource FromIsReadToFontAttributeConverter}}"
+                                           TextColor="{Binding IsRead, Converter={StaticResource FromIsReadToTextColorConverter}}"
+                                           VerticalOptions="Center" />
 
-                                    <Label
-                                    FontSize="12"
-                                    HorizontalOptions="Center"
-                                    HorizontalTextAlignment="Start"
-                                    Text="{Binding Content}"
-                                    VerticalOptions="Center" />
+                                    <Label FontSize="12"
+                                           HorizontalOptions="Start"
+                                           HorizontalTextAlignment="Start"
+                                           FontAttributes="{Binding IsRead, Converter={StaticResource FromIsReadToFontAttributeConverter}}"
+                                           TextColor="{Binding IsRead, Converter={StaticResource FromIsReadToTextColorConverter}}"
+                                           Text="{Binding Content}"
+                                           VerticalOptions="Center" />
 
                                 </StackLayout>
                             </HorizontalStackLayout>

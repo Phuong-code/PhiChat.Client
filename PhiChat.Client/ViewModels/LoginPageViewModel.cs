@@ -21,6 +21,12 @@ namespace PhiChat.Client.ViewModels
         [ObservableProperty]
         private bool isProcessing;
 
+        [ObservableProperty]
+        private Entry usernameEntry;
+
+        [ObservableProperty]
+        private Entry passwordEntry;
+
 
         private readonly ServiceProvider _serviceProvider;
 
@@ -34,6 +40,8 @@ namespace PhiChat.Client.ViewModels
         public async Task Login()
         {
             IsProcessing = true;
+            UsernameEntry.IsEnabled = false;
+            PasswordEntry.IsEnabled = false;
             try
             {
                 var request = new AuthenticateRequest
@@ -58,7 +66,12 @@ namespace PhiChat.Client.ViewModels
             finally
             {
                 IsProcessing = false;
+                UsernameEntry.IsEnabled = true;
+                PasswordEntry.IsEnabled = true;
+
             }
         }
+
+
     }
 }

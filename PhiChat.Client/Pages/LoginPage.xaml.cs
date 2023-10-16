@@ -7,5 +7,10 @@ public partial class LoginPage : ContentPage
 		InitializeComponent();
 
         this.BindingContext = viewModel;
+
+		viewModel.UsernameEntry = usernameEntry;
+
+		viewModel.PasswordEntry = passwordEntry;
+
     }
 }

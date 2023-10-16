@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PhiChat.Client.Services.ChatHub;
 
 namespace PhiChat.Client
 {
@@ -16,19 +17,42 @@ namespace PhiChat.Client
                     fonts.AddFont("MaterialIcons-Regular.ttf", "IconFontTypes");
                 });
 
-            builder.Services.AddSingleton<ServiceProvider>();
-            builder.Services.AddSingleton<LoginPage>();
+            //AppShell
             builder.Services.AddSingleton<AppShell>();
+
+            //ChatHub
+            builder.Services.AddSingleton<ChatHub>();
+
+            //services
+            builder.Services.AddSingleton<ServiceProvider>();
+
+            //Pages
+            builder.Services.AddSingleton<LoginPage>();
+            builder.Services.AddSingleton<ListChatPage>();
+            //builder.Services.AddSingleton<ChatPage>();
+            builder.Services.AddTransient<ChatPage>();
+
+            //View Models
             builder.Services.AddSingleton<LoginPageViewModel>();
             builder.Services.AddSingleton<ListChatPageViewModel>();
-            builder.Services.AddSingleton<ListChatPage>();
-            builder.Services.AddSingleton<ChatPage>();
             builder.Services.AddSingleton<ChatPageViewModel>();
 
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
+            // Removing underline from entry
+            Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(nameof(Entry), (handler, view) => {
+#if ANDROID
+                handler.PlatformView.SetBackgroundColor(Android.Graphics.Color.Transparent);
+#endif
+            });
 
+            // Removing underline from editor
+            Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping(nameof(Editor), (handler, view) => {
+#if ANDROID
+                handler.PlatformView.SetBackgroundColor(Android.Graphics.Color.Transparent);
+#endif
+            });
             return builder.Build();
         }
     }

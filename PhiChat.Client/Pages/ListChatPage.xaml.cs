@@ -7,10 +7,17 @@ public partial class ListChatPage : ContentPage
 		InitializeComponent();
 
 		this.BindingContext = viewModel;
+
+        viewModel.SearchEntry = searchEntry;
 	}
 
     private void ContentPage_NavigatedTo(object sender, NavigatedToEventArgs e)
     {
         (this.BindingContext as ListChatPageViewModel).Initialize();
+    }
+
+    private void Entry_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        (this.BindingContext as ListChatPageViewModel).Search();
     }
 }

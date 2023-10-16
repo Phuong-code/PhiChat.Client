@@ -1,4 +1,5 @@
-﻿using PhiChat.Client.Services.ListChat;
+﻿using PhiChat.Client.Services.ChatHub;
+using PhiChat.Client.Services.ListChat;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,83 +12,46 @@ using System.Web;
 
 namespace PhiChat.Client.ViewModels
 {
-    public class ListChatPageViewModel : INotifyPropertyChanged, IQueryAttributable
+    public partial class ListChatPageViewModel : ObservableObject, IQueryAttributable
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        [ObservableProperty]
+        private User userInfo;
 
-        private ServiceProvider _serviceProvider;
-        //private ChatHub _chatHub;
+        [ObservableProperty]
+        private ObservableCollection<User> userFriends;
 
-        public ListChatPageViewModel(ServiceProvider serviceProvider)
-        //public ListChatPageViewModel(ServiceProvider serviceProvider, ChatHub chatHub)
+        [ObservableProperty]
+        private ObservableCollection<LastestMessage> lastestMessages;
+
+        [ObservableProperty]
+        private ObservableCollection<LastestMessage> allLastestMessages;
+
+        [ObservableProperty]
+        private bool isRefreshing;
+
+        [ObservableProperty]
+        private string searchText;
+
+        [ObservableProperty]
+        private Entry searchEntry;
+
+        private readonly ServiceProvider _serviceProvider;
+        private readonly ChatHub _chatHub;
+
+        public ListChatPageViewModel(ServiceProvider serviceProvider, ChatHub chatHub)
         {
+            _serviceProvider = serviceProvider;
             UserInfo = new User();
             UserFriends = new ObservableCollection<User>();
             LastestMessages = new ObservableCollection<LastestMessage>();
 
-            RefreshCommand = new Command(() =>
-            {
-                Task.Run(async () =>
-                {
-                    IsRefreshing = true;
-                    await GetListFriends();
-                }).GetAwaiter().OnCompleted(() =>
-                {
-                    IsRefreshing = false;
-                });
-            });
+            _chatHub = chatHub;
+            _chatHub.Connect();
+            _chatHub.AddReceivedMessageHandler(OnReceivedMessage);
 
-            OpenChatPageCommand = new Command<int>(async (param) =>
-            {
-                await Shell.Current.GoToAsync($"ChatPage?fromUserId={UserInfo.Id}&toUserId={param}");
-            });
+            //MessagingCenter.Send<string>("StartService", "MessageForegroundService");
+            //MessagingCenter.Send<string, string[]>("StartService", "MessageNotificationService", new string[] { });
 
-            _serviceProvider = serviceProvider;
-            //_chatHub = chatHub;
-            //_chatHub.Connect();
-            //_chatHub.AddReceivedMessageHandler(OnReceivedMessage);
-
-            MessagingCenter.Send<string>("StartService", "MessageForegroundService");
-            MessagingCenter.Send<string, string[]>("StartService", "MessageNotificationService", new string[] { });
-
-        }
-
-        private User userInfo;
-        private ObservableCollection<User> userFriends;
-        private ObservableCollection<LastestMessage> lastestMessages;
-        private bool isRefreshing;
-
-        async Task GetListFriends()
-        {
-            var response = await _serviceProvider.CallWebApi<int, ListChatInitializeResponse>
-                ("/ListChat/Initialize", HttpMethod.Post, UserInfo.Id);
-
-            if (response.StatusCode == 200)
-            {
-                UserInfo = response.User;
-                UserFriends = new ObservableCollection<User>(response.UserFriends);
-                LastestMessages = new ObservableCollection<LastestMessage>(response.LastestMessages);
-            }
-            else
-            {
-                await AppShell.Current.DisplayAlert("ChatApp", response.StatusMessage, "OK");
-            }
-        }
-
-        public void Initialize()
-        {
-            Task.Run(async () =>
-            {
-                IsRefreshing = true;
-                await GetListFriends();
-            }).GetAwaiter().OnCompleted(() =>
-            {
-                IsRefreshing = false;
-            });
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -96,8 +60,51 @@ namespace PhiChat.Client.ViewModels
 
             UserInfo.Id = int.Parse(HttpUtility.UrlDecode(query["userId"].ToString()));
         }
+        public async void Initialize()
+        {
+            await GetListFriends();
+        }
 
-        void OnReceivedMessage(int fromUserId, string message)
+        private async Task GetListFriends()
+        {
+            IsRefreshing = true;
+            try
+            {
+                var response = await _serviceProvider.CallWebApi<int, ListChatInitializeResponse>("/ListChat/Initialize", HttpMethod.Post, UserInfo.Id);
+
+                if (response.StatusCode == 200)
+                {
+                    UserInfo = response.User;
+                    UserFriends = new ObservableCollection<User>(response.UserFriends);
+                    LastestMessages = new ObservableCollection<LastestMessage>(response.LastestMessages);
+                    AllLastestMessages = new ObservableCollection<LastestMessage>(LastestMessages);
+                }
+                else
+                {
+                    await AppShell.Current.DisplayAlert("PhiChat", response.StatusMessage, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await AppShell.Current.DisplayAlert("Can't get Friend Lists Data", $"{ex.Message}", "OK");
+            }
+            finally
+            {
+                IsRefreshing = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task OpenChatPage(int toUserId)
+        {
+            SearchEntry.IsEnabled = false;
+            await Shell.Current.GoToAsync($"ChatPage?fromUserId={UserInfo.Id}&toUserId={toUserId}");
+            SearchEntry.IsEnabled = true;
+
+        }
+
+
+        public void OnReceivedMessage(int fromUserId, string message)
         {
             var lastestMessage = LastestMessages.Where(x => x.UserFriendInfo.Id == fromUserId).FirstOrDefault();
             if (lastestMessage != null)
@@ -105,43 +112,24 @@ namespace PhiChat.Client.ViewModels
 
             var newLastestMessage = new LastestMessage
             {
-                UserId = userInfo.Id,
+                UserId = UserInfo.Id,
                 Content = message,
                 UserFriendInfo = UserFriends.Where(x => x.Id == fromUserId).FirstOrDefault()
             };
 
             LastestMessages.Insert(0, newLastestMessage);
-            OnPropertyChanged("LastestMessages");
+            //OnPropertyChanged("LastestMessages");
 
-            MessagingCenter.Send<string, string[]>("Notify", "MessageNotificationService",
-                new string[] { newLastestMessage.UserFriendInfo.UserName, newLastestMessage.Content });
+            //MessagingCenter.Send<string, string[]>("Notify", "MessageNotificationService",
+            //    new string[] { newLastestMessage.UserFriendInfo.UserName, newLastestMessage.Content });
         }
 
-        public User UserInfo
+        [RelayCommand]
+        public void Search()
         {
-            get { return userInfo; }
-            set { userInfo = value; OnPropertyChanged(); }
-        }
-        public ObservableCollection<User> UserFriends
-        {
-            get { return userFriends; }
-            set { userFriends = value; OnPropertyChanged(); }
-        }
+            LastestMessages = new ObservableCollection<LastestMessage>(AllLastestMessages);
+            LastestMessages = new ObservableCollection<LastestMessage>(LastestMessages.Where(lm => lm.UserFriendInfo.UserName.ToLower().Contains(SearchText.ToLower())));
 
-        public ObservableCollection<LastestMessage> LastestMessages
-        {
-            get { return lastestMessages; }
-            set { lastestMessages = value; OnPropertyChanged(); }
         }
-
-        public bool IsRefreshing
-        {
-            get { return isRefreshing; }
-            set { isRefreshing = value; OnPropertyChanged(); }
-        }
-
-        public ICommand RefreshCommand { get; set; }
-
-        public ICommand OpenChatPageCommand { get; set; }
     }
 }
